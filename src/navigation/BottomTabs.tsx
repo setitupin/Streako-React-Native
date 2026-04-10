@@ -106,15 +106,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     width: 80,
-    borderRadius: 20,
   },
   tabItemActive: {
+    borderRadius: 20,
     backgroundColor: '#1E2540',
   },
   tabLabel: {
     marginTop: 6,
     fontSize: 11,
-    borderRadius: 32,
     color: '#71788A',
     fontWeight: '600',
   },
