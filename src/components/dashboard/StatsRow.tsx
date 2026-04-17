@@ -2,13 +2,23 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TrendingUp } from 'lucide-react-native';
 
-export const StatsRow = () => {
+interface StatsRowProps {
+  completedToday: number;
+  totalToday: number;
+  weeklyScore: number;
+}
+
+export const StatsRow: React.FC<StatsRowProps> = ({
+  completedToday,
+  totalToday,
+  weeklyScore,
+}) => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.label}>Weekly Score</Text>
         <View style={styles.valueRow}>
-          <Text style={styles.valueAccent}>85%</Text>
+          <Text style={styles.valueAccent}>{Math.round(weeklyScore)}%</Text>
           <TrendingUp color="#00F0FF" size={18} style={styles.icon} />
         </View>
       </View>
@@ -16,8 +26,8 @@ export const StatsRow = () => {
       <View style={styles.card}>
         <Text style={styles.label}>Tasks Today</Text>
         <View style={styles.valueRow}>
-          <Text style={styles.valuePrimary}>8</Text>
-          <Text style={styles.valueSuffix}>/12</Text>
+          <Text style={styles.valuePrimary}>{completedToday}</Text>
+          <Text style={styles.valueSuffix}>/{totalToday}</Text>
         </View>
       </View>
     </View>

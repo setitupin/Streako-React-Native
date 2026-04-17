@@ -1,19 +1,27 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export const HabitOverview = () => {
+interface HabitOverviewProps {
+  consistencyScore: number;
+  streakLabel: string;
+}
+
+export const HabitOverview: React.FC<HabitOverviewProps> = ({
+  consistencyScore,
+  streakLabel,
+}) => {
   return (
     <View style={styles.container}>
       <View style={styles.leftCol}>
         <Text style={styles.label}>CONSISTENCY SCORE</Text>
         <View style={styles.scoreRow}>
-          <Text style={styles.scoreLarge}>98</Text>
+          <Text style={styles.scoreLarge}>{consistencyScore}</Text>
           <Text style={styles.scoreSmall}>%</Text>
         </View>
       </View>
       <View style={styles.rightCol}>
         <Text style={styles.label}>WEEKLY STREAK</Text>
-        <Text style={styles.streakAccent}>24 Days</Text>
+        <Text style={styles.streakAccent}>{streakLabel}</Text>
       </View>
     </View>
   );

@@ -1,17 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const chartData = [
-  { day: 'M', height: '25%', active: false },
-  { day: 'T', height: '50%', active: false },
-  { day: 'W', height: '80%', active: true },
-  { day: 'T', height: '40%', active: false },
-  { day: 'F', height: '65%', active: false },
-  { day: 'S', height: '35%', active: false },
-  { day: 'S', height: '25%', active: false },
-];
+interface ActivityChartItem {
+  active: boolean;
+  day: string;
+  height: string;
+}
 
-export const ActivityChart = () => {
+interface ActivityChartProps {
+  data: ActivityChartItem[];
+  trendLabel: string;
+}
+
+export const ActivityChart: React.FC<ActivityChartProps> = ({ data, trendLabel }) => {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -20,12 +21,12 @@ export const ActivityChart = () => {
           <Text style={styles.subtitle}>Task completion velocity</Text>
         </View>
         <View style={styles.pill}>
-          <Text style={styles.pillText}>+12% vs LY</Text>
+          <Text style={styles.pillText}>{trendLabel}</Text>
         </View>
       </View>
       
       <View style={styles.chartContainer}>
-        {chartData.map((item, index) => (
+        {data.map((item, index) => (
           <View key={index} style={styles.barColumn}>
             <View style={styles.barTrack}>
               <View 

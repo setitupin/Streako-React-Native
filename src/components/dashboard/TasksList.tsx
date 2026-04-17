@@ -1,26 +1,48 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { PenTool, LineChart } from 'lucide-react-native';
+import { CheckCircle2, Circle, PenTool } from 'lucide-react-native';
 
-const TaskCard = ({ title, subtitle, Icon, isActive }: any) => {
+interface TasksListItem {
+  id: number;
+  subtitle: string;
+  title: string;
+}
+
+interface TasksListProps {
+  items: TasksListItem[];
+}
+
+const TaskCard = ({
+  isActive,
+  subtitle,
+  title,
+}: {
+  isActive: boolean;
+  subtitle: string;
+  title: string;
+}) => {
   return (
     <View style={styles.card}>
       {isActive && <View style={styles.activeBorder} />}
       <View style={styles.cardContent}>
         <View style={styles.iconBox}>
-          <Icon color="#B3C8E9" size={18} />
+          <PenTool color="#B3C8E9" size={18} />
         </View>
         <View style={styles.textContainer}>
           <Text style={styles.taskTitle}>{title}</Text>
           <Text style={styles.taskSubtitle}>{subtitle}</Text>
         </View>
-        <View style={styles.circleEmpty} />
+        {isActive ? (
+          <Circle color="#2A344A" size={22} />
+        ) : (
+          <CheckCircle2 color="#A99AFE" size={22} />
+        )}
       </View>
     </View>
   );
 };
 
-export const TasksList = () => {
+export const TasksList: React.FC<TasksListProps> = ({ items }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -29,20 +51,15 @@ export const TasksList = () => {
           <Text style={styles.viewAll}>View All</Text>
         </TouchableOpacity>
       </View>
-      
-      <TaskCard 
-        title="Refine UI System" 
-        subtitle="High priority • 2h left" 
-        Icon={PenTool} 
-        isActive={true} 
-      />
-      
-      <TaskCard 
-        title="Analyze Q3 Streaks" 
-        subtitle="Project • Tomorrow" 
-        Icon={LineChart} 
-        isActive={false} 
-      />
+
+      {items.map((item, index) => (
+        <TaskCard
+          key={item.id}
+          title={item.title}
+          subtitle={item.subtitle}
+          isActive={index === 0}
+        />
+      ))}
     </View>
   );
 };

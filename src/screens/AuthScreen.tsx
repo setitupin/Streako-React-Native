@@ -1,28 +1,81 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { useAuthStore } from '../store/useAuthStore';
+import React, { useMemo, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Lock } from 'lucide-react-native';
+import { useHealthCheckQuery, useLoginMutation, useRegisterMutation } from '../api/queries/auth';
+import { API_BASE_URL, ApiError } from '../api/client';
 
 export const AuthScreen = () => {
   const [isLoginBlock, setIsLoginBlock] = useState(true);
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
+  const loginMutation = useLoginMutation();
+  const registerMutation = useRegisterMutation();
+  const healthCheckQuery = useHealthCheckQuery();
 
-  const { login, signup } = useAuthStore();
+  const isSubmitting = loginMutation.isPending || registerMutation.isPending;
 
-  const handleAction = () => {
+  const healthStatusText = useMemo(() => {
+    if (healthCheckQuery.isLoading) {
+      return 'Checking backend status...';
+    }
+
+    if (healthCheckQuery.isError) {
+      return `Backend unavailable at ${API_BASE_URL}`;
+    }
+
+    return `${healthCheckQuery.data?.message || 'Backend connected'} (${API_BASE_URL})`;
+  }, [healthCheckQuery.data?.message, healthCheckQuery.isError, healthCheckQuery.isLoading]);
+
+  const handleError = (error: unknown) => {
+    const message =
+      error instanceof ApiError
+        ? error.message
+        : 'Unable to reach the Streako API. Check that the backend is running.';
+
+    Alert.alert('Request Failed', message);
+  };
+
+  const handleAction = async () => {
     if (isLoginBlock) {
-      const success = login(username, password);
-      if (!success) Alert.alert('Error', 'Invalid credentials. Use admin/admin');
-    } else {
-      if (!email || !username || !password) {
-        Alert.alert('Error', 'Please fill in all fields');
+      if (!email || !password) {
+        Alert.alert('Error', 'Please enter your email and password');
         return;
       }
-      const success = signup(email, username, password);
-      if (!success) Alert.alert('Error', 'Could not sign up');
+
+      try {
+        await loginMutation.mutateAsync({ email, password });
+      } catch (error) {
+        handleError(error);
+      }
+    } else {
+      if (!email || !password) {
+        Alert.alert('Error', 'Email and password are required');
+        return;
+      }
+
+      try {
+        await registerMutation.mutateAsync({
+          email,
+          password,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          timezone: 'Asia/Kolkata',
+        });
+      } catch (error) {
+        handleError(error);
+      }
     }
   };
 
@@ -41,25 +94,38 @@ export const AuthScreen = () => {
             {isLoginBlock ? 'Sign in to access your dashboard' : 'Sign up to start tracking your habits'}
           </Text>
 
+          <Text style={styles.statusText}>{healthStatusText}</Text>
+
           {!isLoginBlock && (
             <TextInput
               style={styles.input}
-              placeholder="Email address"
+              placeholder="First name"
               placeholderTextColor="#71788A"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
+              value={firstName}
+              onChangeText={setFirstName}
+              autoCapitalize="words"
+            />
+          )}
+
+          {!isLoginBlock && (
+            <TextInput
+              style={styles.input}
+              placeholder="Last name"
+              placeholderTextColor="#71788A"
+              value={lastName}
+              onChangeText={setLastName}
+              autoCapitalize="words"
             />
           )}
 
           <TextInput
             style={styles.input}
-            placeholder="Username"
+            placeholder="Email address"
             placeholderTextColor="#71788A"
-            value={username}
-            onChangeText={setUsername}
+            value={email}
+            onChangeText={setEmail}
             autoCapitalize="none"
+            keyboardType="email-address"
           />
 
           <TextInput
@@ -71,9 +137,13 @@ export const AuthScreen = () => {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleAction}>
+          <TouchableOpacity
+            style={[styles.primaryButton, isSubmitting && styles.primaryButtonDisabled]}
+            onPress={handleAction}
+            disabled={isSubmitting}
+          >
             <Text style={styles.primaryButtonText}>
-              {isLoginBlock ? 'Sign In' : 'Sign Up'}
+              {isSubmitting ? 'Please wait...' : isLoginBlock ? 'Sign In' : 'Sign Up'}
             </Text>
           </TouchableOpacity>
 
@@ -121,7 +191,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#71788A',
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
+  },
+  statusText: {
+    color: '#8A96A8',
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: 'center',
+    marginBottom: 20,
   },
   input: {
     backgroundColor: '#121A26',
@@ -140,6 +217,9 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 8,
+  },
+  primaryButtonDisabled: {
+    opacity: 0.7,
   },
   primaryButtonText: {
     color: '#090D14',

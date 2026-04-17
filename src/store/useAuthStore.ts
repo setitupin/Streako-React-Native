@@ -1,30 +1,20 @@
 import { create } from 'zustand';
+import type { AuthUser } from '../api/types';
+import { queryClient } from '../api/queryClient';
 
 interface AuthState {
-  isLoggedIn: boolean;
-  username: string | null;
-  login: (username: string, password: string) => boolean;
-  signup: (email: string, username: string, password: string) => boolean;
+  token: string | null;
+  user: AuthUser | null;
+  setSession: (session: { token: string; user: AuthUser }) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  isLoggedIn: false,
-  username: null,
-  login: (username, password) => {
-    if (username === 'admin' && password === 'admin') {
-      set({ isLoggedIn: true, username });
-      return true;
-    }
-    return false;
+  token: null,
+  user: null,
+  setSession: ({ token, user }) => set({ token, user }),
+  logout: () => {
+    queryClient.clear();
+    set({ token: null, user: null });
   },
-  signup: (email, username, password) => {
-    // For dev purpose, just accept the signup and log them in
-    if (email && username && password) {
-      set({ isLoggedIn: true, username });
-      return true;
-    }
-    return false;
-  },
-  logout: () => set({ isLoggedIn: false, username: null }),
 }));

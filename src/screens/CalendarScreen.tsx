@@ -7,11 +7,32 @@ import { DateScroller } from '../components/calendar/DateScroller';
 import { TimelineEvent } from '../components/calendar/TimelineEvent';
 import { TimelineNow } from '../components/calendar/TimelineNow';
 import { FloatingActionButton } from '../components/dashboard/FloatingActionButton';
-import { Video, ListChecks, Wine, AlertCircle } from 'lucide-react-native'; // Standard glass missing, Wine used as proxy
+import { Video, ListChecks, Wine } from 'lucide-react-native';
+import { StateCard } from '../components/common/StateCard';
+import { useEventsQuery } from '../api/queries/events';
+import { formatTime, getEventAccent, toLocalDateKey } from '../utils/formatters';
+import type { EventKind } from '../api/types';
 
 export const CalendarScreen = () => {
   const insets = useSafeAreaInsets();
   const [activeDate, setActiveDate] = useState<Date>(new Date());
+  const activeDateKey = toLocalDateKey(activeDate);
+  const eventsQuery = useEventsQuery({
+    date_from: activeDateKey,
+    date_to: activeDateKey,
+  });
+
+  const getEventIcon = (kind: EventKind) => {
+    if (kind === 'meeting') {
+      return Video;
+    }
+
+    if (kind === 'task') {
+      return ListChecks;
+    }
+
+    return Wine;
+  };
   
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -25,50 +46,50 @@ export const CalendarScreen = () => {
         <DateScroller activeDate={activeDate} onDateSelect={setActiveDate} />
 
         <View style={styles.flowHeader}>
-          <Text style={styles.flowTitle}>Today's Flow</Text>
+          <Text style={styles.flowTitle}>Daily Flow</Text>
           <View style={styles.headerLine} />
         </View>
 
-        {/* Timeline Events Array */}
-        <TimelineEvent 
-          time="09:00"
-          accent="#00F0FF"
-          category="MEETING"
-          title="Product Sync: Q4 Vision"
-          description="Strategy alignment with the design leads regarding kinetic motion systems."
-          hasAvatars={true}
-          Icon={Video}
-        />
+        {eventsQuery.isLoading ? (
+          <StateCard title="Loading events" message={`Fetching calendar data for ${activeDateKey}.`} loading />
+        ) : null}
 
-        <TimelineEvent 
-          time="11:30"
-          accent="#F43F5E"
-          category="DEADLINE"
-          title="Final Asset Handoff"
-          description="Submit high-fidelity prototypes and kinetic Sanctuary components to dev team."
-          Icon={AlertCircle}
-        />
+        {eventsQuery.error ? (
+          <StateCard
+            title="Calendar unavailable"
+            message={eventsQuery.error instanceof Error ? eventsQuery.error.message : 'Unable to load events.'}
+            tone="error"
+          />
+        ) : null}
 
-        <TimelineNow />
+        {toLocalDateKey(new Date()) === activeDateKey && (eventsQuery.data || []).length > 0 ? (
+          <TimelineNow />
+        ) : null}
 
-        <TimelineEvent 
-          time="14:00"
-          accent="#A99AFE"
-          category="TASK"
-          title="Deep Work: Animation Specs"
-          description="Defining the cubic-bezier curves for the Sanctuary navigation transitions."
-          Icon={ListChecks}
-        />
+        {(eventsQuery.data || [])
+          .slice()
+          .sort((left, right) => left.start_time.localeCompare(right.start_time))
+          .map((event, index, items) => {
+            const accent = getEventAccent(event.kind);
+            const Icon = getEventIcon(event.kind);
 
-        <TimelineEvent 
-          time="17:30"
-          accent="#8A96A8"
-          category="EVENT"
-          title="Community Mixer"
-          description="Designers & coffee at the rooftop lounge."
-          Icon={Wine}
-          isLast={true}
-        />
+            return (
+              <TimelineEvent
+                key={event.id}
+                time={formatTime(event.start_time)}
+                accent={accent}
+                category={event.kind.toUpperCase()}
+                title={event.title}
+                description={event.description || 'No description provided.'}
+                Icon={Icon}
+                isLast={index === items.length - 1}
+              />
+            );
+          })}
+
+        {!eventsQuery.isLoading && (eventsQuery.data || []).length === 0 ? (
+          <StateCard message={`No events were found for ${activeDateKey}.`} />
+        ) : null}
         
       </ScrollView>
 

@@ -1,14 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const heatData = [
-  // Top row
-  ["#1C253B", "#1C253B", "#1C253B", "#25304A", "#A99AFE", "#A99AFE", "#25304A"],
-  // Bottom row
-  ["#1C253B", "#1C253B", "#25304A", "#1C253B", "#7C69EE", "#25304A", "#1C253B"]
-];
+interface ActivityHeatmapProps {
+  heatData: string[][];
+}
 
-export const ActivityHeatmap = () => {
+export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ heatData }) => {
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Activity Heatmap</Text>

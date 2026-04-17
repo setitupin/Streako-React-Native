@@ -2,7 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Star } from 'lucide-react-native';
 
-export const MilestoneCard = () => {
+interface MilestoneCardProps {
+  footerText: string;
+  progressRatio: number;
+  title: string;
+}
+
+export const MilestoneCard: React.FC<MilestoneCardProps> = ({
+  footerText,
+  progressRatio,
+  title,
+}) => {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -12,15 +22,13 @@ export const MilestoneCard = () => {
         <Text style={styles.label}>NEXT MILESTONE</Text>
       </View>
       
-      <Text style={styles.title}>
-        Complete 7 more days of 'Gym' to reach 'Bronze Athlete' level
-      </Text>
+      <Text style={styles.title}>{title}</Text>
       
       <View style={styles.progressTrack}>
-        <View style={styles.progressFill} />
+        <View style={[styles.progressFill, { width: `${Math.min(progressRatio * 100, 100)}%` }]} />
       </View>
       
-      <Text style={styles.footerText}>Current Progress: 14/21 days</Text>
+      <Text style={styles.footerText}>{footerText}</Text>
     </View>
   );
 };
@@ -68,7 +76,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   progressFill: {
-    width: '66%',
     height: '100%',
     backgroundColor: '#A99AFE',
     borderRadius: 2,

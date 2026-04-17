@@ -2,18 +2,26 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Flame, Zap } from 'lucide-react-native';
 
-export const HabitMetricsRow = () => {
+interface HabitMetricsRowProps {
+  dailyVelocity: string;
+  powerSessions: number;
+}
+
+export const HabitMetricsRow: React.FC<HabitMetricsRowProps> = ({
+  dailyVelocity,
+  powerSessions,
+}) => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
         <Flame color="#00F0FF" size={20} fill="#00F0FF" />
         <Text style={styles.label}>Power Sessions</Text>
-        <Text style={styles.value}>128</Text>
+        <Text style={styles.value}>{powerSessions}</Text>
       </View>
       <View style={styles.card}>
         <Zap color="#A99AFE" size={20} fill="#A99AFE" />
         <Text style={styles.label}>Daily Velocity</Text>
-        <Text style={styles.value}>+12%</Text>
+        <Text style={styles.value}>{dailyVelocity}</Text>
       </View>
     </View>
   );

@@ -7,7 +7,7 @@ import { BottomTabs } from './BottomTabs';
 const Stack = createNativeStackNavigator();
 
 export const RootNavigator = () => {
-  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const isLoggedIn = useAuthStore((state) => Boolean(state.token));
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

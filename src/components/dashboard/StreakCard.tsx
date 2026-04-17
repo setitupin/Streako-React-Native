@@ -2,7 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Flame } from 'lucide-react-native';
 
-export const StreakCard = () => {
+interface StreakCardProps {
+  currentDays: number;
+  longestDays: number;
+}
+
+export const StreakCard: React.FC<StreakCardProps> = ({ currentDays, longestDays }) => {
+  const progress = longestDays > 0 ? Math.min((currentDays / longestDays) * 100, 100) : 0;
+
   return (
     <View style={styles.card}>
       <View style={styles.headerRow}>
@@ -10,17 +17,17 @@ export const StreakCard = () => {
           <Flame color="#00F0FF" size={14} fill="#00F0FF" />
           <Text style={styles.title}>Active Streak</Text>
         </View>
-        <Text style={styles.dayText}>Day 5</Text>
+        <Text style={styles.dayText}>Best {longestDays || 0}</Text>
       </View>
       
       <View style={styles.valueRow}>
-        <Text style={styles.valueLarge}>5</Text>
+        <Text style={styles.valueLarge}>{currentDays}</Text>
         <Text style={styles.valueSmall}>days</Text>
       </View>
       
       <View style={styles.progressContainer}>
         <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: '65%' }]} />
+          <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
       </View>
     </View>
